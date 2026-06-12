@@ -1,4 +1,4 @@
-export const MAP_IMAGE_URL = "/maps/sword-coast.jpg";
+export const MAP_IMAGE_URL = "/maps/sword-coast.webp";
 
 export const MAP_SIZE = {
   width: 1525,
