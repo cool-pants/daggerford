@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# environment and secrets
+.env
+.env.*
+.secrets
+
+# local/editor files
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# project archives/generators
+Generators/
+assets/Sword-Coast-Map_HighRes.jpg

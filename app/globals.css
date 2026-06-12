@@ -1,0 +1,66 @@
+@import "leaflet/dist/leaflet.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --background: #efe8d2;
+  --foreground: #1f2a24;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    linear-gradient(135deg, rgba(47, 111, 115, 0.12), transparent 36%),
+    linear-gradient(315deg, rgba(159, 89, 48, 0.16), transparent 42%),
+    var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #1e2d2d;
+}
+
+.atlas-marker {
+  align-items: center;
+  background: #f7f0dc;
+  border: 2px solid #2f6f73;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(31, 42, 36, 0.28);
+  color: #1f2a24;
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.atlas-popup .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.atlas-popup .leaflet-popup-content {
+  margin: 0;
+}
