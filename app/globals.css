@@ -57,6 +57,11 @@ select {
   width: 28px;
 }
 
+.atlas-marker-hidden {
+  opacity: 0.45;
+  filter: saturate(0.35);
+}
+
 .atlas-popup .leaflet-popup-content-wrapper {
   border-radius: 8px;
 }

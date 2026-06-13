@@ -77,19 +77,19 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
     setEditorOpen(false);
   }
 
-  async function hideLabel(label: MapLabel) {
-    const hiddenLabel: MapLabel = { ...label, visibility: "hidden" };
+  async function toggleLabelVisibility(label: MapLabel) {
+    const nextVisibility = label.visibility === "public" ? "hidden" : "public";
+    const updatedLabel: MapLabel = { ...label, visibility: nextVisibility };
     const response = await fetch(`/api/labels/${label.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(hiddenLabel)
+      body: JSON.stringify(updatedLabel)
     });
     if (!response.ok) {
       return;
     }
     const saved = (await response.json()) as MapLabel;
     setLabels((current) => current.map((item) => (item.id === label.id ? saved : item)));
-    setSheetLabelId(undefined);
   }
 
   async function saveNote(note: GMNote) {
@@ -153,11 +153,11 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
           selectedId={selectedId}
           onFilterChange={setFilter}
           onQueryChange={setQuery}
-            onSelect={(label) => {
-              setSelectedId(label.id);
-              setSheetLabelId(label.id);
-              setDrawerOpen(false);
-            }}
+          onSelect={(label) => {
+            setSelectedId(label.id);
+            setSheetLabelId(label.id);
+            setDrawerOpen(false);
+          }}
           onToggle={() => setDrawerOpen((open) => !open)}
         />
         <section className="relative min-w-0 flex-1">
@@ -184,7 +184,7 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
         onAddNote={openNoteEditor}
         onClose={() => setSheetLabelId(undefined)}
         onEdit={(label) => openEditor(label)}
-        onHide={hideLabel}
+        onToggleVisibility={toggleLabelVisibility}
       />
       <LabelEditorDialog
         label={editingLabel}

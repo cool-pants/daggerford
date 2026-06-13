@@ -23,7 +23,7 @@ export function LocationList({ labels, selectedId, onSelect }: Props) {
               selectedId === label.id
                 ? "border-tide bg-white shadow-sm"
                 : "border-ink/10 bg-white/65 hover:bg-white"
-            }`}
+            } ${label.visibility !== "public" ? "opacity-55" : ""}`}
             onClick={() => onSelect(label)}
             type="button"
           >
@@ -33,6 +33,11 @@ export function LocationList({ labels, selectedId, onSelect }: Props) {
                 {label.type}
               </span>
             </div>
+            {label.visibility !== "public" ? (
+              <span className="mt-2 inline-flex rounded-full bg-ink/10 px-2 py-0.5 text-xs font-bold capitalize text-ink/55">
+                {label.visibility}
+              </span>
+            ) : null}
             <p className="mt-1 line-clamp-2 text-sm leading-5 text-ink/70">{label.description}</p>
           </button>
         ))}

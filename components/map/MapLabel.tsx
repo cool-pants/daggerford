@@ -10,9 +10,10 @@ type Props = {
 };
 
 export function MapLabel({ label, onOpen }: Props) {
+  const isHidden = label.visibility !== "public";
   const icon = new DivIcon({
     className: "",
-    html: `<div class="atlas-marker">${label.icon ?? label.title.charAt(0)}</div>`,
+    html: `<div class="atlas-marker ${isHidden ? "atlas-marker-hidden" : ""}">${label.icon ?? label.title.charAt(0)}</div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14]
   });
