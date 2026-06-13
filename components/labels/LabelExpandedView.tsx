@@ -1,11 +1,12 @@
 import { Castle, Flag, ScrollText, Skull, Users } from "lucide-react";
 import { GMNotesPanel } from "@/components/gm/GMNotesPanel";
-import type { MapLabel } from "@/lib/labels";
+import type { GMNote, MapLabel } from "@/lib/labels";
 
 type Props = {
   label: MapLabel;
   showGMNotes?: boolean;
   compact?: boolean;
+  onSaveGMNote?: (note: GMNote) => void;
 };
 
 const relationGroups = [
@@ -31,7 +32,7 @@ const relationGroups = [
   }
 ] as const;
 
-export function LabelExpandedView({ label, showGMNotes = false, compact = false }: Props) {
+export function LabelExpandedView({ label, showGMNotes = false, compact = false, onSaveGMNote }: Props) {
   return (
     <div className={compact ? "space-y-3" : "space-y-6"}>
       <section>
@@ -97,7 +98,7 @@ export function LabelExpandedView({ label, showGMNotes = false, compact = false 
             </h2>
           </div>
           <div className="mt-3">
-            <GMNotesPanel notes={label.notes} compact={compact} />
+            <GMNotesPanel notes={label.notes} compact={compact} labelId={label.id} onSaveNote={onSaveGMNote} />
           </div>
         </section>
       ) : null}

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, EyeOff, FileText, Pencil, Plus, X } from "lucide-react";
+import { Eye, EyeOff, FileText, Pencil, X } from "lucide-react";
 import { LabelExpandedView } from "@/components/labels/LabelExpandedView";
 import { Button } from "@/components/ui/button";
-import type { MapLabel } from "@/lib/labels";
+import type { GMNote, MapLabel } from "@/lib/labels";
 
 type Props = {
   label?: MapLabel;
@@ -12,10 +12,10 @@ type Props = {
   onClose: () => void;
   onEdit: (label: MapLabel) => void;
   onToggleVisibility: (label: MapLabel) => void;
-  onAddNote: (label: MapLabel) => void;
+  onSaveGMNote: (note: GMNote) => void;
 };
 
-export function LabelSheet({ label, isGM, onClose, onEdit, onToggleVisibility, onAddNote }: Props) {
+export function LabelSheet({ label, isGM, onClose, onEdit, onToggleVisibility, onSaveGMNote }: Props) {
   if (!label) {
     return null;
   }
@@ -66,10 +66,6 @@ export function LabelSheet({ label, isGM, onClose, onEdit, onToggleVisibility, o
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>
-                  <Button size="sm" onClick={() => onAddNote(label)}>
-                    <Plus className="h-4 w-4" />
-                    Note
-                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => onToggleVisibility(label)}>
                     {label.visibility === "public" ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     {label.visibility === "public" ? "Hide" : "Unhide"}
@@ -78,7 +74,7 @@ export function LabelSheet({ label, isGM, onClose, onEdit, onToggleVisibility, o
               ) : null}
             </div>
           </div>
-          <LabelExpandedView label={label} showGMNotes={isGM} />
+          <LabelExpandedView label={label} showGMNotes={isGM} onSaveGMNote={onSaveGMNote} />
         </div>
       </div>
     </div>

@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { Menu, PanelLeftOpen } from "lucide-react";
 import { useMemo, useState } from "react";
 import { LocationDrawer } from "@/components/drawer/LocationDrawer";
-import { GMNoteEditor } from "@/components/gm/GMNoteEditor";
 import { GMToolbar } from "@/components/gm/GMToolbar";
 import { LabelEditorDialog } from "@/components/gm/LabelEditorDialog";
 import { LabelSheet } from "@/components/labels/LabelSheet";
@@ -32,11 +31,9 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
   const [isSuperuser, setIsSuperuser] = useState(Boolean(initialGM?.isSuperuser));
   const [placementMode, setPlacementMode] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [noteEditorOpen, setNoteEditorOpen] = useState(false);
   const [editingLabel, setEditingLabel] = useState<MapLabel | undefined>();
   const [sheetLabelId, setSheetLabelId] = useState<string | undefined>();
   const [pendingPoint, setPendingPoint] = useState<{ x: number; y: number } | undefined>();
-  const [noteLabelId, setNoteLabelId] = useState<string | undefined>();
 
   const visibleLabels = useMemo(() => (isGM ? labels : getPublicLabels(labels)), [isGM, labels]);
   const filteredLabels = useMemo(() => searchLabels(visibleLabels, query, filter), [visibleLabels, query, filter]);
@@ -113,11 +110,6 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
     setEditorOpen(true);
   }
 
-  function openNoteEditor(label: MapLabel) {
-    setNoteLabelId(label.id);
-    setNoteEditorOpen(true);
-  }
-
   return (
     <main className="flex h-dvh min-h-[680px] flex-col overflow-hidden">
       <header className="z-[800] flex h-16 shrink-0 items-center justify-between border-b border-ink/10 bg-parchment/95 px-3 shadow-sm backdrop-blur md:px-5">
@@ -181,9 +173,9 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
       <LabelSheet
         isGM={isGM}
         label={sheetLabel}
-        onAddNote={openNoteEditor}
         onClose={() => setSheetLabelId(undefined)}
         onEdit={(label) => openEditor(label)}
+        onSaveGMNote={saveNote}
         onToggleVisibility={toggleLabelVisibility}
       />
       <LabelEditorDialog
@@ -197,12 +189,6 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
         }}
         onDelete={deleteLabel}
         onSave={saveLabel}
-      />
-      <GMNoteEditor
-        labelId={noteLabelId}
-        open={noteEditorOpen}
-        onClose={() => setNoteEditorOpen(false)}
-        onSave={saveNote}
       />
     </main>
   );
