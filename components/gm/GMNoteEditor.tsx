@@ -29,7 +29,8 @@ export function GMNoteEditor({ open, labelId, onClose, onSave }: Props) {
       labelId,
       noteType,
       title: title.trim(),
-      body: body.trim()
+      body: body.trim(),
+      tags: []
     });
     setTitle("");
     setBody("");

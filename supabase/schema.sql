@@ -38,10 +38,13 @@ create table if not exists gm_notes (
   note_type text not null,
   title text not null,
   body text not null,
+  tags text[] not null default '{}',
   created_by uuid references gm_keys(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table gm_notes add column if not exists tags text[] not null default '{}';
 
 create index if not exists labels_visibility_idx on labels (visibility);
 create index if not exists labels_type_idx on labels (type);

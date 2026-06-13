@@ -19,7 +19,7 @@ export function GMNotesPanel({ notes, compact = false, labelId, onSaveNote }: Pr
       {labelId && onSaveNote ? <GMNoteInlineEditor labelId={labelId} onSave={onSaveNote} /> : null}
       {notes.length ? (
         notes.map((note) => (
-          <details key={note.id} className="group rounded-md border border-ink/10 bg-white/75">
+          <details key={note.id} className="group rounded-md border border-white/70 bg-white/75 shadow-sm">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-3">
               <span>
                 <span className="block text-xs font-bold uppercase tracking-wide text-copper">
@@ -27,10 +27,10 @@ export function GMNotesPanel({ notes, compact = false, labelId, onSaveNote }: Pr
                 </span>
                 <span className="mt-1 block font-bold">{note.title}</span>
               </span>
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-ink/5 text-lg font-bold text-ink/60 group-open:hidden">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-sky/10 text-lg font-bold text-tide group-open:hidden">
                 +
               </span>
-              <span className="hidden h-7 w-7 shrink-0 place-items-center rounded-md bg-ink/5 text-lg font-bold text-ink/60 group-open:grid">
+              <span className="hidden h-7 w-7 shrink-0 place-items-center rounded-md bg-sky/10 text-lg font-bold text-tide group-open:grid">
                 -
               </span>
             </summary>
@@ -40,7 +40,7 @@ export function GMNotesPanel({ notes, compact = false, labelId, onSaveNote }: Pr
           </details>
         ))
       ) : (
-        <p className="rounded-md border border-ink/10 bg-white/55 p-4 text-sm text-ink/60">No GM notes yet.</p>
+        <p className="rounded-md border border-white/70 bg-white/60 p-4 text-sm text-ink/60 shadow-sm">No GM notes yet.</p>
       )}
     </div>
   );
@@ -63,7 +63,8 @@ function GMNoteInlineEditor({ labelId, onSave }: { labelId: string; onSave: (not
       labelId,
       noteType,
       title: title.trim(),
-      body: body.trim()
+      body: body.trim(),
+      tags: []
     });
     setTitle("");
     setBody("");
@@ -80,10 +81,10 @@ function GMNoteInlineEditor({ labelId, onSave }: { labelId: string; onSave: (not
   }
 
   return (
-    <form className="rounded-md border border-ink/10 bg-white/80 p-3" onSubmit={submit}>
+    <form className="rounded-md border border-white/70 bg-white/80 p-3 shadow-sm" onSubmit={submit}>
       <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
         <select
-          className="h-10 w-full rounded-md border border-ink/15 bg-white/85 px-3 text-sm outline-none focus:border-tide focus:ring-2 focus:ring-tide/20"
+          className="h-10 w-full rounded-md border border-ink/10 bg-white/85 px-3 text-sm shadow-sm outline-none focus:border-sky focus:ring-2 focus:ring-sky/25"
           value={noteType}
           onChange={(event) => setNoteType(event.target.value as GMNote["noteType"])}
         >

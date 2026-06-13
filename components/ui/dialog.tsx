@@ -17,8 +17,8 @@ export function Dialog({ open, title, children, onClose }: DialogProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-ink/45 p-4">
-      <div className="max-h-[90vh] w-full max-w-xl overflow-auto rounded-lg bg-parchment shadow-atlas">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-ink/35 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-xl overflow-auto rounded-lg border border-white/70 bg-white/90 shadow-atlas backdrop-blur-xl">
         <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
           <h2 className="text-lg font-bold">{title}</h2>
           <Button aria-label="Close dialog" size="icon" variant="ghost" onClick={onClose}>

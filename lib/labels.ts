@@ -18,6 +18,7 @@ export type GMNote = {
   noteType: "npc" | "location" | "event" | "secret" | "quest_hook" | "faction" | "loot" | "encounter";
   title: string;
   body: string;
+  tags: string[];
   createdBy?: string;
 };
 
@@ -71,14 +72,16 @@ export const sampleLabels: MapLabel[] = [
         labelId: "daggerford",
         noteType: "npc",
         title: "Guard Captain Maelin",
-        body: "Wants adventurers to stabilize the roads before winter caravans arrive."
+        body: "Wants adventurers to stabilize the roads before winter caravans arrive.",
+        tags: ["#delimbiyr"]
       },
       {
         id: "note-daggerford-secret",
         labelId: "daggerford",
         noteType: "secret",
         title: "Unsettling Court Rumor",
-        body: "Several councilors insist the Duchess has changed since the last dragon raid."
+        body: "Several councilors insist the Duchess has changed since the last dragon raid.",
+        tags: ["#delimbiyr"]
       }
     ]
   },
@@ -154,7 +157,8 @@ export const sampleLabels: MapLabel[] = [
         labelId: "lizard-marsh",
         noteType: "encounter",
         title: "Marsh Lights",
-        body: "The lights are corpse-candles marking the route to a flooded barrow."
+        body: "The lights are corpse-candles marking the route to a flooded barrow.",
+        tags: ["#delimbiyr"]
       }
     ]
   }

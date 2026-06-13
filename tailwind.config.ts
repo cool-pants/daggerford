@@ -9,14 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#1f2a24",
-        parchment: "#f4efe0",
-        copper: "#9f5930",
-        moss: "#526846",
-        tide: "#2f6f73"
+        ink: "#20241f",
+        parchment: "#f7f3e7",
+        copper: "#b16b2b",
+        moss: "#4c7a30",
+        tide: "#247b8a",
+        sky: "#4aa9df",
+        meadow: "#6f9f2e",
+        sun: "#f2c14e",
+        flower: "#d94b35",
+        steel: "#4b5963"
       },
       boxShadow: {
-        atlas: "0 18px 60px rgba(31, 42, 36, 0.22)"
+        atlas: "0 20px 60px rgba(30, 42, 44, 0.18)",
+        fluent: "0 8px 24px rgba(32, 36, 31, 0.14)"
       }
     }
   },

@@ -4,7 +4,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Sword Coast Atlas",
-  description: "A campaign atlas for Sword Coast locations, notes, and GM map labels."
+  description: "A campaign atlas for Sword Coast locations, notes, and GM map labels.",
+  icons: {
+    icon: "/icon.jpg",
+    apple: "/icon.jpg"
+  }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

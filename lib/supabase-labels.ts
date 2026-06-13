@@ -26,6 +26,7 @@ type NoteRow = {
   note_type: GMNote["noteType"];
   title: string;
   body: string;
+  tags?: string[] | null;
   created_by?: string | null;
 };
 
@@ -54,6 +55,7 @@ function mapNote(row: NoteRow): GMNote {
     noteType: row.note_type,
     title: row.title,
     body: row.body,
+    tags: row.tags ?? [],
     createdBy: row.created_by ?? undefined
   };
 }
@@ -106,6 +108,7 @@ function toNoteRow(note: GMNote, createdBy?: string) {
     note_type: note.noteType,
     title: note.title,
     body: note.body,
+    tags: note.tags,
     created_by: createdBy ?? note.createdBy
   };
 }

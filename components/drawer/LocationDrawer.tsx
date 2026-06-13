@@ -5,17 +5,21 @@ import { Button } from "@/components/ui/button";
 import { LocationFilters } from "@/components/drawer/LocationFilters";
 import { LocationList } from "@/components/drawer/LocationList";
 import { LocationSearch } from "@/components/drawer/LocationSearch";
+import { MapTagPills } from "@/components/drawer/MapTagPills";
 import type { LabelType, MapLabel } from "@/lib/labels";
+import type { MapTagFilter } from "@/lib/map";
 
 type Props = {
   labels: MapLabel[];
   query: string;
   filter: LabelType | "all";
+  mapFilter: MapTagFilter;
   selectedId?: string;
   isOpen: boolean;
   onToggle: () => void;
   onQueryChange: (query: string) => void;
   onFilterChange: (type: LabelType | "all") => void;
+  onMapFilterChange: (filter: MapTagFilter) => void;
   onSelect: (label: MapLabel) => void;
 };
 
@@ -23,11 +27,13 @@ export function LocationDrawer({
   labels,
   query,
   filter,
+  mapFilter,
   selectedId,
   isOpen,
   onToggle,
   onQueryChange,
   onFilterChange,
+  onMapFilterChange,
   onSelect
 }: Props) {
   return (
@@ -42,7 +48,7 @@ export function LocationDrawer({
         {isOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
       </Button>
       <aside
-        className={`z-[850] border-ink/10 bg-parchment/95 shadow-atlas backdrop-blur transition md:static md:block md:h-full md:w-80 md:border-r md:shadow-none ${
+        className={`z-[850] border-white/70 bg-white/75 shadow-atlas backdrop-blur-xl transition md:static md:block md:h-full md:w-80 md:border-r md:shadow-none ${
           isOpen
             ? "fixed inset-x-3 bottom-3 max-h-[72vh] overflow-auto rounded-lg border p-4"
             : "hidden"
@@ -55,6 +61,7 @@ export function LocationDrawer({
           </Button>
         </div>
         <div className="space-y-4 md:p-4">
+          <MapTagPills value={mapFilter} onChange={onMapFilterChange} />
           <LocationSearch value={query} onChange={onQueryChange} />
           <LocationFilters value={filter} onChange={onFilterChange} />
           <LocationList labels={labels} selectedId={selectedId} onSelect={onSelect} />

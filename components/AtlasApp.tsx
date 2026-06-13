@@ -2,13 +2,15 @@
 
 import dynamic from "next/dynamic";
 import { Menu, PanelLeftOpen } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LocationDrawer } from "@/components/drawer/LocationDrawer";
 import { GMToolbar } from "@/components/gm/GMToolbar";
 import { LabelEditorDialog } from "@/components/gm/LabelEditorDialog";
 import { LabelSheet } from "@/components/labels/LabelSheet";
+import { RulerPanel } from "@/components/map/RulerPanel";
 import { Button } from "@/components/ui/button";
 import { getPublicLabels, searchLabels, type GMNote, type LabelType, type MapLabel } from "@/lib/labels";
+import { ATLAS_MAPS, DEFAULT_MAP_ID, getAtlasMap, getMapTag, type AtlasMapId, type MapPoint, type MapTagFilter } from "@/lib/map";
 
 const SwordCoastMap = dynamic(() => import("@/components/map/SwordCoastMap").then((mod) => mod.SwordCoastMap), {
   ssr: false,
@@ -25,26 +27,47 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
   const [labels, setLabels] = useState<MapLabel[]>(initialLabels);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<LabelType | "all">("all");
+  const [activeMapId, setActiveMapId] = useState<AtlasMapId>(DEFAULT_MAP_ID);
+  const [mapFilter, setMapFilter] = useState<MapTagFilter>(DEFAULT_MAP_ID);
   const [selectedId, setSelectedId] = useState<string>(initialLabels[0]?.id ?? "");
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [isGM, setIsGM] = useState(initialIsGM);
   const [isSuperuser, setIsSuperuser] = useState(Boolean(initialGM?.isSuperuser));
   const [placementMode, setPlacementMode] = useState(false);
+  const [rulerMode, setRulerMode] = useState(false);
+  const [rulerPoints, setRulerPoints] = useState<MapPoint[]>([]);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingLabel, setEditingLabel] = useState<MapLabel | undefined>();
   const [sheetLabelId, setSheetLabelId] = useState<string | undefined>();
   const [pendingPoint, setPendingPoint] = useState<{ x: number; y: number } | undefined>();
 
+  const activeMap = getAtlasMap(activeMapId);
   const visibleLabels = useMemo(() => (isGM ? labels : getPublicLabels(labels)), [isGM, labels]);
-  const filteredLabels = useMemo(() => searchLabels(visibleLabels, query, filter), [visibleLabels, query, filter]);
-  const selectedLabel = visibleLabels.find((label) => label.id === selectedId);
+  const activeMapLabels = useMemo(() => {
+    const tag = getMapTag(activeMapId);
+    return visibleLabels.filter((label) => label.tags.includes(tag));
+  }, [activeMapId, visibleLabels]);
+  const mapFilteredLabels = useMemo(() => {
+    if (mapFilter === "all") {
+      return visibleLabels;
+    }
+    const tag = getMapTag(mapFilter);
+    return visibleLabels.filter((label) => label.tags.includes(tag));
+  }, [mapFilter, visibleLabels]);
+  const filteredLabels = useMemo(() => searchLabels(mapFilteredLabels, query, filter), [mapFilteredLabels, query, filter]);
+  const selectedLabel = activeMapLabels.find((label) => label.id === selectedId);
   const sheetLabel = visibleLabels.find((label) => label.id === sheetLabelId);
 
   async function saveLabel(label: MapLabel) {
+    const mapTag = getMapTag(activeMapId);
+    const labelWithMapTag: MapLabel = {
+      ...label,
+      tags: label.tags.includes(mapTag) ? label.tags : [...label.tags, mapTag]
+    };
     const response = await fetch("/api/labels", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(label)
+      body: JSON.stringify(labelWithMapTag)
     });
     if (!response.ok) {
       return;
@@ -90,10 +113,15 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
   }
 
   async function saveNote(note: GMNote) {
+    const mapTag = getMapTag(activeMapId);
+    const noteWithMapTag: GMNote = {
+      ...note,
+      tags: note.tags.includes(mapTag) ? note.tags : [...note.tags, mapTag]
+    };
     const response = await fetch("/api/gm-notes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(note)
+      body: JSON.stringify(noteWithMapTag)
     });
     if (!response.ok) {
       return;
@@ -110,19 +138,57 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
     setEditorOpen(true);
   }
 
+  function setActiveMap(mapId: AtlasMapId) {
+    setActiveMapId(mapId);
+    setMapFilter(mapId);
+    if (mapId !== "delimbiyr") {
+      setRulerMode(false);
+      setRulerPoints([]);
+    }
+  }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setRulerMode(false);
+        setRulerPoints([]);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <main className="flex h-dvh min-h-[680px] flex-col overflow-hidden">
-      <header className="z-[800] flex h-16 shrink-0 items-center justify-between border-b border-ink/10 bg-parchment/95 px-3 shadow-sm backdrop-blur md:px-5">
+      <header className="z-[800] flex h-16 shrink-0 items-center justify-between border-b border-white/70 bg-white/75 px-3 shadow-sm backdrop-blur-xl md:px-5">
         <div className="flex items-center gap-3">
           <Button className="hidden md:inline-flex" size="icon" variant="ghost" onClick={() => setDrawerOpen((open) => !open)}>
             {drawerOpen ? <Menu className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
           </Button>
           <div>
             <h1 className="text-lg font-black leading-tight sm:text-xl">Sword Coast Atlas</h1>
-            <p className="hidden text-xs font-semibold uppercase tracking-wide text-ink/55 sm:block">
+            <p className="hidden text-xs font-semibold uppercase tracking-wide text-steel/70 sm:block">
               Player map and GM campaign layer
             </p>
           </div>
+        </div>
+        <div className="hidden rounded-md border border-white/70 bg-white/70 p-1 shadow-sm backdrop-blur-xl md:flex">
+          {ATLAS_MAPS.map((map) => (
+            <button
+              key={map.id}
+              className={`h-9 rounded px-3 text-sm font-bold transition ${
+                activeMapId === map.id ? "bg-tide text-white shadow-sm" : "text-ink/75 hover:bg-white hover:text-ink"
+              }`}
+              suppressHydrationWarning
+              type="button"
+              onClick={() => {
+                setActiveMap(map.id);
+              }}
+            >
+              {map.label}
+            </button>
+          ))}
         </div>
         <GMToolbar
           isGM={isGM}
@@ -132,8 +198,10 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
             setIsGM(false);
             setIsSuperuser(false);
             setPlacementMode(false);
+            setRulerMode(false);
           }}
           onTogglePlacement={() => setPlacementMode((value) => !value)}
+          onBeforePlacement={() => setRulerMode(false)}
         />
       </header>
       <div className="flex min-h-0 flex-1">
@@ -141,9 +209,11 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
           filter={filter}
           isOpen={drawerOpen}
           labels={filteredLabels}
+          mapFilter={mapFilter}
           query={query}
           selectedId={selectedId}
           onFilterChange={setFilter}
+          onMapFilterChange={setMapFilter}
           onQueryChange={setQuery}
           onSelect={(label) => {
             setSelectedId(label.id);
@@ -153,21 +223,53 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
           onToggle={() => setDrawerOpen((open) => !open)}
         />
         <section className="relative min-w-0 flex-1">
+          {activeMapId === "delimbiyr" ? (
+            <Button
+              className="absolute right-4 top-4 z-[710] shadow-atlas"
+              variant={rulerMode ? "primary" : "secondary"}
+              onClick={() => {
+                setPlacementMode(false);
+                setRulerMode((active) => !active);
+              }}
+            >
+              Ruler
+            </Button>
+          ) : null}
           {placementMode ? (
             <div className="absolute left-1/2 top-4 z-[700] -translate-x-1/2 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-parchment shadow-atlas">
               Click the map to place a new label
             </div>
           ) : null}
+          {rulerMode ? (
+            <div className="absolute left-1/2 top-4 z-[700] -translate-x-1/2 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-parchment shadow-atlas">
+              Click map points to measure. Press Esc to exit.
+            </div>
+          ) : null}
           <SwordCoastMap
-            labels={visibleLabels}
+            atlasMap={activeMap}
+            labels={activeMapLabels}
             placementMode={placementMode}
+            rulerMode={rulerMode}
+            rulerPoints={rulerPoints}
             selectedLabel={selectedLabel}
             onOpenLabel={(label) => {
               setSelectedId(label.id);
               setSheetLabelId(label.id);
             }}
             onPlace={(point) => openEditor(undefined, point)}
+            onRulerPoint={(point) => setRulerPoints((points) => [...points, point])}
           />
+          {activeMapId === "delimbiyr" ? (
+            <RulerPanel
+              active={rulerMode}
+              points={rulerPoints}
+              onClear={() => setRulerPoints([])}
+              onClose={() => {
+                setRulerMode(false);
+                setRulerPoints([]);
+              }}
+            />
+          ) : null}
         </section>
       </div>
       <LabelSheet

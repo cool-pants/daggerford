@@ -14,7 +14,7 @@ export function LocationSearch({ value, onChange }: Props) {
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/45" />
       <Input
         aria-label="Search locations"
-        className="pl-9"
+        className="bg-white/80 pl-9"
         placeholder="Search locations..."
         value={value}
         onChange={(event) => onChange(event.target.value)}

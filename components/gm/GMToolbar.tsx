@@ -10,10 +10,11 @@ type Props = {
   isSuperuser: boolean;
   placementMode: boolean;
   onLogout: () => void;
+  onBeforePlacement?: () => void;
   onTogglePlacement: () => void;
 };
 
-export function GMToolbar({ isGM, isSuperuser, placementMode, onLogout, onTogglePlacement }: Props) {
+export function GMToolbar({ isGM, isSuperuser, placementMode, onLogout, onBeforePlacement, onTogglePlacement }: Props) {
   async function logout() {
     await fetch("/api/auth/gm/logout", { method: "POST" });
     onLogout();
@@ -21,10 +22,18 @@ export function GMToolbar({ isGM, isSuperuser, placementMode, onLogout, onToggle
 
   return (
     <div className="flex items-center gap-2">
-      {isGM ? <AddLabelControl active={placementMode} onToggle={onTogglePlacement} /> : null}
+      {isGM ? (
+        <AddLabelControl
+          active={placementMode}
+          onToggle={() => {
+            onBeforePlacement?.();
+            onTogglePlacement();
+          }}
+        />
+      ) : null}
       {isSuperuser ? (
         <Link
-          className="hidden h-10 items-center justify-center gap-2 rounded-md border border-ink/15 bg-white/80 px-4 text-sm font-semibold text-ink transition hover:bg-white sm:inline-flex"
+          className="hidden h-10 items-center justify-center gap-2 rounded-md border border-ink/10 bg-white/80 px-4 text-sm font-semibold text-ink shadow-sm transition hover:bg-white sm:inline-flex"
           href="/gm/manage"
         >
           <Settings className="h-4 w-4" />
@@ -43,7 +52,7 @@ export function GMToolbar({ isGM, isSuperuser, placementMode, onLogout, onToggle
             Player
           </Button>
           <Link
-            className="h-10 items-center justify-center gap-2 rounded-md border border-ink/15 bg-white/80 px-4 text-sm font-semibold text-ink transition hover:bg-white sm:inline-flex"
+            className="h-10 items-center justify-center gap-2 rounded-md border border-ink/10 bg-white/80 px-4 text-sm font-semibold text-ink shadow-sm transition hover:bg-white sm:inline-flex"
             href="/gm/login"
           >
             <LogIn className="h-4 w-4" />

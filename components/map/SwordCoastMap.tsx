@@ -5,14 +5,19 @@ import { useEffect, useRef } from "react";
 import { ImageOverlay, MapContainer, useMap } from "react-leaflet";
 import { MapClickHandler } from "@/components/map/MapClickHandler";
 import { MapLabel } from "@/components/map/MapLabel";
+import { RulerLayer } from "@/components/map/RulerLayer";
 import type { MapLabel as MapLabelType } from "@/lib/labels";
-import { MAP_BOUNDS, MAP_IMAGE_URL } from "@/lib/map";
+import type { AtlasMap, MapPoint } from "@/lib/map";
 
 type Props = {
+  atlasMap: AtlasMap;
   labels: MapLabelType[];
   selectedLabel?: MapLabelType;
   placementMode: boolean;
+  rulerMode: boolean;
+  rulerPoints: MapPoint[];
   onPlace: (point: { x: number; y: number }) => void;
+  onRulerPoint: (point: MapPoint) => void;
   onOpenLabel: (label: MapLabelType) => void;
 };
 
@@ -29,36 +34,59 @@ function MapFocus({ label }: { label?: MapLabelType }) {
   return null;
 }
 
+function MapBoundsSync({ atlasMap }: { atlasMap: AtlasMap }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setMaxBounds(atlasMap.bounds);
+    map.fitBounds(atlasMap.bounds, { animate: false });
+  }, [atlasMap, map]);
+
+  return null;
+}
+
 export function SwordCoastMap({
+  atlasMap,
   labels,
   selectedLabel,
   placementMode,
+  rulerMode,
+  rulerPoints,
   onPlace,
+  onRulerPoint,
   onOpenLabel
 }: Props) {
   const mapRef = useRef<LeafletMap | null>(null);
 
   return (
-    <div className={`h-full min-h-0 ${placementMode ? "cursor-crosshair" : ""}`}>
+    <div className={`h-full min-h-0 ${placementMode || rulerMode ? "cursor-crosshair" : ""}`}>
       <MapContainer
         ref={mapRef}
-        bounds={MAP_BOUNDS}
+        bounds={atlasMap.bounds}
         className="h-full w-full"
         crs={CRS.Simple}
-        maxBounds={MAP_BOUNDS}
+        maxBounds={atlasMap.bounds}
         maxBoundsViscosity={0.85}
         maxZoom={3}
         minZoom={-2}
         scrollWheelZoom
       >
-        <ImageOverlay bounds={MAP_BOUNDS} url={MAP_IMAGE_URL} />
+        <ImageOverlay key={atlasMap.id} bounds={atlasMap.bounds} url={atlasMap.url} />
+        <MapBoundsSync atlasMap={atlasMap} />
         <MapClickHandler enabled={placementMode} onPlace={onPlace} />
+        <RulerLayer enabled={rulerMode} points={rulerPoints} onAddPoint={onRulerPoint} />
         <MapFocus label={selectedLabel} />
         {labels.map((label) => (
           <MapLabel
             key={label.id}
             label={label}
-            onOpen={onOpenLabel}
+            onOpen={(clickedLabel) => {
+              if (rulerMode) {
+                onRulerPoint({ x: clickedLabel.x, y: clickedLabel.y });
+                return;
+              }
+              onOpenLabel(clickedLabel);
+            }}
           />
         ))}
       </MapContainer>

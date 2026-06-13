@@ -67,7 +67,7 @@ export function GMManagementPanel({ initialSnapshot }: Props) {
           </div>
           <div>
             <h1 className="text-2xl font-black">GM Management</h1>
-            <p className="text-sm text-ink/65">Only Superusers can create GMs and inspect cross-GM campaign work.</p>
+            <p className="text-sm text-ink/60">Only Superusers can create GMs and inspect cross-GM campaign work.</p>
           </div>
         </div>
         <form className="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_1.4fr_auto]" onSubmit={submit}>
@@ -132,7 +132,7 @@ function ManagementList({
   items: Array<{ title: string; meta: string; body?: string }>;
 }) {
   return (
-    <section className="rounded-lg border border-ink/10 bg-white/65 p-4">
+    <section className="rounded-lg border border-ink/10 bg-white/70 p-4">
       <div className="flex items-center justify-between">
         <h2 className="font-black">{title}</h2>
         <span className="text-xs font-bold text-ink/45">{items.length}</span>
@@ -147,7 +147,7 @@ function ManagementList({
             </article>
           ))
         ) : (
-          <p className="rounded-md border border-dashed border-ink/15 p-3 text-sm text-ink/55">No records yet.</p>
+          <p className="rounded-md border border-dashed border-ink/15 p-3 text-sm text-ink/50">No records yet.</p>
         )}
       </div>
     </section>

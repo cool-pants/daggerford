@@ -36,7 +36,7 @@ export function LabelExpandedView({ label, showGMNotes = false, compact = false,
   return (
     <div className={compact ? "space-y-3" : "space-y-6"}>
       <section>
-        <h2 className={compact ? "sr-only" : "text-sm font-bold uppercase tracking-wide text-ink/55"}>
+        <h2 className={compact ? "sr-only" : "text-sm font-bold uppercase tracking-wide text-ink/50"}>
           Public Description
         </h2>
         <p className={compact ? "text-sm leading-5 text-ink/75" : "mt-2 text-lg leading-8 text-ink/80"}>
@@ -45,14 +45,14 @@ export function LabelExpandedView({ label, showGMNotes = false, compact = false,
       </section>
 
       <section>
-        <h2 className={compact ? "text-xs font-bold uppercase tracking-wide text-ink/55" : "text-sm font-bold uppercase tracking-wide text-ink/55"}>
+        <h2 className={compact ? "text-xs font-bold uppercase tracking-wide text-ink/50" : "text-sm font-bold uppercase tracking-wide text-ink/50"}>
           Connections
         </h2>
         <div className={compact ? "mt-2 grid gap-2" : "mt-3 grid gap-3 sm:grid-cols-2"}>
           {relationGroups.map(({ key, title, icon: Icon }) => {
             const values = label[key];
             return (
-              <div key={key} className="rounded-md border border-ink/10 bg-white/65 p-3">
+              <div key={key} className="rounded-md border border-white/70 bg-white/70 p-3 shadow-sm">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-copper">
                   <Icon className="h-4 w-4" />
                   {title}
@@ -60,13 +60,13 @@ export function LabelExpandedView({ label, showGMNotes = false, compact = false,
                 {values.length ? (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {values.map((value) => (
-                      <span key={value} className="rounded-full bg-moss/12 px-2 py-1 text-xs font-semibold text-moss">
+                      <span key={value} className="rounded-full bg-meadow/15 px-2 py-1 text-xs font-semibold text-moss">
                         {value}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-2 text-sm text-ink/55">None linked.</p>
+                  <p className="mt-2 text-sm text-ink/50">None linked.</p>
                 )}
               </div>
             );
@@ -76,12 +76,12 @@ export function LabelExpandedView({ label, showGMNotes = false, compact = false,
 
       {label.tags.length ? (
         <section>
-          <h2 className={compact ? "text-xs font-bold uppercase tracking-wide text-ink/55" : "text-sm font-bold uppercase tracking-wide text-ink/55"}>
+          <h2 className={compact ? "text-xs font-bold uppercase tracking-wide text-ink/50" : "text-sm font-bold uppercase tracking-wide text-ink/50"}>
             Tags
           </h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {label.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-tide/10 px-3 py-1 text-xs font-semibold text-tide">
+                <span key={tag} className="rounded-full bg-sky/15 px-3 py-1 text-xs font-semibold text-tide">
                 {tag}
               </span>
             ))}
@@ -93,7 +93,7 @@ export function LabelExpandedView({ label, showGMNotes = false, compact = false,
         <section>
           <div className="flex items-center gap-2">
             <Skull className="h-4 w-4 text-copper" />
-            <h2 className={compact ? "text-xs font-bold uppercase tracking-wide text-ink/55" : "text-xl font-black"}>
+            <h2 className={compact ? "text-xs font-bold uppercase tracking-wide text-ink/50" : "text-xl font-black"}>
               GM Notes
             </h2>
           </div>
