@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Eye, EyeOff, FileText, Pencil, Skull, X } from "lucide-react";
 import { LabelExpandedView } from "@/components/labels/LabelExpandedView";
 import { Button } from "@/components/ui/button";
-import type { GMNote, MapLabel } from "@/lib/labels";
+import { isPartiallyDestroyed, type GMNote, type MapLabel } from "@/lib/labels";
 
 type Props = {
   label?: MapLabel;
@@ -35,6 +35,8 @@ export function LabelSheet({ label, isGM, onClose, onEdit, onToggleVisibility, o
   if (!label) {
     return null;
   }
+
+  const isPartial = isPartiallyDestroyed(label);
 
   function handleBackdropMouseDown(event: MouseEvent<HTMLDivElement>) {
     if (event.target === event.currentTarget) {
@@ -77,6 +79,11 @@ export function LabelSheet({ label, isGM, onClose, onEdit, onToggleVisibility, o
                 <span className="inline-flex items-center gap-1 rounded-full bg-flower/15 px-3 py-1 text-sm font-bold text-flower">
                   <Skull className="h-4 w-4" />
                   Destroyed
+                </span>
+              ) : null}
+              {isPartial ? (
+                <span className="rounded-full bg-sun/30 px-3 py-1 text-sm font-bold text-copper">
+                  Partially Destroyed
                 </span>
               ) : null}
             </div>

@@ -48,6 +48,28 @@ create table if not exists gm_notes (
 alter table gm_notes add column if not exists tags text[] not null default '{}';
 alter table labels add column if not exists destroyed boolean not null default false;
 
+with destruction_events as (
+  select
+    label_id,
+    array_agg(distinct title) as titles
+  from gm_notes
+  where note_type = 'event'
+    and (
+      title ilike '%destroy%'
+      or body ilike '%destroy%'
+      or tags @> array['partially destroyed']::text[]
+    )
+  group by label_id
+)
+update labels
+set linked_events = (
+  select array_agg(distinct event_title order by event_title)
+  from unnest(labels.linked_events || destruction_events.titles) as event_title
+  where btrim(event_title) <> ''
+)
+from destruction_events
+where labels.id = destruction_events.label_id;
+
 create index if not exists labels_visibility_idx on labels (visibility);
 create index if not exists labels_type_idx on labels (type);
 create index if not exists gm_notes_label_id_idx on gm_notes (label_id);

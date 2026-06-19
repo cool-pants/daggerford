@@ -4,12 +4,21 @@ import dynamic from "next/dynamic";
 import { Menu, PanelLeftOpen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { LocationDrawer } from "@/components/drawer/LocationDrawer";
+import { BatchDestroyDialog } from "@/components/gm/BatchDestroyDialog";
 import { GMToolbar } from "@/components/gm/GMToolbar";
 import { LabelEditorDialog } from "@/components/gm/LabelEditorDialog";
 import { LabelSheet } from "@/components/labels/LabelSheet";
 import { RulerPanel } from "@/components/map/RulerPanel";
 import { Button } from "@/components/ui/button";
-import { getPublicLabels, searchLabels, type GMNote, type LabelType, type MapLabel } from "@/lib/labels";
+import { uuidOrNew } from "@/lib/ids";
+import {
+  PARTIALLY_DESTROYED_TAG,
+  getPublicLabels,
+  searchLabels,
+  type GMNote,
+  type LabelType,
+  type MapLabel
+} from "@/lib/labels";
 import { ATLAS_MAPS, DEFAULT_MAP_ID, getAtlasMap, getMapTag, type AtlasMapId, type MapPoint, type MapTagFilter } from "@/lib/map";
 
 const SwordCoastMap = dynamic(() => import("@/components/map/SwordCoastMap").then((mod) => mod.SwordCoastMap), {
@@ -40,6 +49,9 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
   const [editingLabel, setEditingLabel] = useState<MapLabel | undefined>();
   const [sheetLabelId, setSheetLabelId] = useState<string | undefined>();
   const [pendingPoint, setPendingPoint] = useState<{ x: number; y: number } | undefined>();
+  const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
+  const [batchDestroyOpen, setBatchDestroyOpen] = useState(false);
+  const [batchSaving, setBatchSaving] = useState(false);
 
   const activeMap = getAtlasMap(activeMapId);
   const visibleLabels = useMemo(() => (isGM ? labels : getPublicLabels(labels)), [isGM, labels]);
@@ -92,6 +104,7 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
       return;
     }
     setLabels((current) => current.filter((item) => item.id !== label.id));
+    setSelectedLabelIds((current) => current.filter((id) => id !== label.id));
     setSelectedId((current) => (current === label.id ? labels.find((item) => item.id !== label.id)?.id ?? "" : current));
     setSheetLabelId(undefined);
     setEditorOpen(false);
@@ -130,6 +143,100 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
     setLabels((current) =>
       current.map((label) => (label.id === saved.labelId ? { ...label, notes: [...label.notes, saved] } : label))
     );
+  }
+
+  function toggleLabelSelected(labelId: string) {
+    setSelectedLabelIds((current) =>
+      current.includes(labelId) ? current.filter((id) => id !== labelId) : [...current, labelId]
+    );
+  }
+
+  async function markSelectedDestroyed(note: { title: string; body: string; partiallyDestroyed: boolean }) {
+    if (!selectedLabelIds.length || batchSaving) {
+      return;
+    }
+
+    setBatchSaving(true);
+    const selectedIds = new Set(selectedLabelIds);
+    const selectedLabels = labels.filter((label) => selectedIds.has(label.id));
+    const mapTag = getMapTag(activeMapId);
+    const successfulUpdates: Array<{ id: string; note: GMNote }> = [];
+
+    try {
+      for (const label of selectedLabels) {
+        const tags = note.partiallyDestroyed
+          ? label.tags.includes(PARTIALLY_DESTROYED_TAG)
+            ? label.tags
+            : [...label.tags, PARTIALLY_DESTROYED_TAG]
+          : label.tags.filter((tag) => tag !== PARTIALLY_DESTROYED_TAG);
+        const linkedEvents = label.linkedEvents.includes(note.title)
+          ? label.linkedEvents
+          : [...label.linkedEvents, note.title];
+        const updatedLabel: MapLabel = { ...label, destroyed: !note.partiallyDestroyed, tags, linkedEvents };
+        const labelResponse = await fetch(`/api/labels/${label.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedLabel)
+        });
+
+        if (!labelResponse.ok) {
+          continue;
+        }
+
+        const eventNote: GMNote = {
+          id: uuidOrNew(undefined),
+          labelId: label.id,
+          noteType: "event",
+          title: note.title,
+          body: note.body,
+          tags: [label.tags.includes(mapTag) ? mapTag : "", note.partiallyDestroyed ? PARTIALLY_DESTROYED_TAG : ""].filter(
+            Boolean
+          )
+        };
+        const noteResponse = await fetch("/api/gm-notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(eventNote)
+        });
+
+        if (!noteResponse.ok) {
+          continue;
+        }
+
+        successfulUpdates.push({ id: label.id, note: (await noteResponse.json()) as GMNote });
+      }
+
+      if (successfulUpdates.length) {
+        const updates = new Map(successfulUpdates.map((update) => [update.id, update.note]));
+        setLabels((current) =>
+          current.map((label) => {
+            const savedNote = updates.get(label.id);
+            if (!savedNote) {
+              return label;
+            }
+            const tags = note.partiallyDestroyed
+              ? label.tags.includes(PARTIALLY_DESTROYED_TAG)
+                ? label.tags
+                : [...label.tags, PARTIALLY_DESTROYED_TAG]
+              : label.tags.filter((tag) => tag !== PARTIALLY_DESTROYED_TAG);
+            const linkedEvents = label.linkedEvents.includes(note.title)
+              ? label.linkedEvents
+              : [...label.linkedEvents, note.title];
+            return {
+              ...label,
+              destroyed: !note.partiallyDestroyed,
+              tags,
+              linkedEvents,
+              notes: [...label.notes, savedNote]
+            };
+          })
+        );
+        setSelectedLabelIds((current) => current.filter((id) => !updates.has(id)));
+      }
+    } finally {
+      setBatchSaving(false);
+      setBatchDestroyOpen(false);
+    }
   }
 
   function openEditor(label?: MapLabel, point?: { x: number; y: number }) {
@@ -208,19 +315,25 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
       <div className="flex min-h-0 flex-1">
         <LocationDrawer
           filter={filter}
+          isGM={isGM}
           isOpen={drawerOpen}
           labels={filteredLabels}
           mapFilter={mapFilter}
           query={query}
           selectedId={selectedId}
+          selectedLabelIds={selectedLabelIds}
+          onClearSelectedLabels={() => setSelectedLabelIds([])}
           onFilterChange={setFilter}
           onMapFilterChange={setMapFilter}
+          onOpenBatchDestroy={() => setBatchDestroyOpen(true)}
           onQueryChange={setQuery}
           onSelect={(label) => {
             setSelectedId(label.id);
             setSheetLabelId(label.id);
             setDrawerOpen(false);
           }}
+          onSelectAllLabels={() => setSelectedLabelIds(filteredLabels.map((label) => label.id))}
+          onToggleLabelSelected={toggleLabelSelected}
           onToggle={() => setDrawerOpen((open) => !open)}
         />
         <section className="relative min-w-0 flex-1">
@@ -292,6 +405,17 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
         }}
         onDelete={deleteLabel}
         onSave={saveLabel}
+      />
+      <BatchDestroyDialog
+        count={selectedLabelIds.length}
+        open={batchDestroyOpen}
+        saving={batchSaving}
+        onClose={() => {
+          if (!batchSaving) {
+            setBatchDestroyOpen(false);
+          }
+        }}
+        onSave={markSelectedDestroyed}
       />
     </main>
   );

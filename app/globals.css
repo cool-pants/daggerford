@@ -99,6 +99,13 @@ select {
   opacity: 0.38;
 }
 
+.atlas-marker-partially-destroyed {
+  background: #fff3b0;
+  border-color: #f28c28;
+  color: #9a4f00;
+  box-shadow: 0 10px 24px rgba(242, 140, 40, 0.28);
+}
+
 .atlas-popup .leaflet-popup-content-wrapper {
   border-radius: 8px;
 }

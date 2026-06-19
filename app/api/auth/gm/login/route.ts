@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GM_COOKIE, GM_SESSION_MAX_AGE_SECONDS } from "@/lib/auth";
+import { GM_COOKIE, getGMSessionMaxAgeSeconds } from "@/lib/auth";
 import { isUuid } from "@/lib/ids";
 import { verifyGMCredentials } from "@/lib/supabase-gm";
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const response = NextResponse.json({ ok: true, gm: { username: gm.username, displayName: gm.displayName } });
   response.cookies.set(GM_COOKIE, uuid, {
     httpOnly: true,
-    maxAge: GM_SESSION_MAX_AGE_SECONDS,
+    maxAge: getGMSessionMaxAgeSeconds(gm.username),
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/"

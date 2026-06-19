@@ -11,6 +11,7 @@ export type LabelType =
   | "mystery";
 
 export type LabelVisibility = "public" | "hidden" | "gm_only";
+export const PARTIALLY_DESTROYED_TAG = "partially destroyed";
 
 export type GMNote = {
   id: string;
@@ -174,14 +175,69 @@ export function getPublicLabels(labels: MapLabel[]) {
   return labels.filter((label) => label.visibility === "public");
 }
 
+export function isPartiallyDestroyed(label: MapLabel) {
+  return !label.destroyed && label.tags.includes(PARTIALLY_DESTROYED_TAG);
+}
+
+function normalizeSearchValue(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function parseSearchQuery(query: string) {
+  const filters: { tag: string[]; event: string[] } = { tag: [], event: [] };
+  const remaining = query.replace(/\b(tag|event):([^\s]+)/gi, (_match, key: "tag" | "event", value: string) => {
+    filters[key.toLowerCase() as "tag" | "event"].push(
+      ...value
+        .split(",")
+        .map(normalizeSearchValue)
+        .filter(Boolean)
+    );
+    return " ";
+  });
+
+  return {
+    text: normalizeSearchValue(remaining),
+    filters
+  };
+}
+
+function labelMatchesTagFilter(label: MapLabel, tags: string[]) {
+  if (!tags.length) {
+    return true;
+  }
+
+  const labelTags = label.tags.map(normalizeSearchValue);
+  return tags.some((tag) => {
+    if (tag === "destroyed") {
+      return label.destroyed;
+    }
+    if (tag === PARTIALLY_DESTROYED_TAG) {
+      return isPartiallyDestroyed(label);
+    }
+    return labelTags.some((labelTag) => labelTag.includes(tag));
+  });
+}
+
+function labelMatchesEventFilter(label: MapLabel, events: string[]) {
+  if (!events.length) {
+    return true;
+  }
+
+  const linkedEvents = label.linkedEvents.map(normalizeSearchValue);
+  return events.some((event) => linkedEvents.some((linkedEvent) => linkedEvent.includes(event)));
+}
+
 export function searchLabels(labels: MapLabel[], query: string, type: LabelType | "all") {
-  const normalized = query.trim().toLowerCase();
+  const { text, filters } = parseSearchQuery(query);
   return labels.filter((label) => {
     const typeMatches = type === "all" || label.type === type;
     if (!typeMatches) {
       return false;
     }
-    if (!normalized) {
+    if (!labelMatchesTagFilter(label, filters.tag) || !labelMatchesEventFilter(label, filters.event)) {
+      return false;
+    }
+    if (!text) {
       return true;
     }
     const haystack = [
@@ -198,7 +254,7 @@ export function searchLabels(labels: MapLabel[], query: string, type: LabelType 
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
-    return haystack.includes(normalized);
+    return haystack.includes(text);
   });
 }
 

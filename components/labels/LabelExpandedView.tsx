@@ -1,6 +1,6 @@
 import { Castle, Flag, ScrollText, Skull, Users } from "lucide-react";
 import { GMNotesPanel } from "@/components/gm/GMNotesPanel";
-import type { GMNote, MapLabel } from "@/lib/labels";
+import { isPartiallyDestroyed, type GMNote, type MapLabel } from "@/lib/labels";
 
 type Props = {
   label: MapLabel;
@@ -33,11 +33,18 @@ const relationGroups = [
 ] as const;
 
 export function LabelExpandedView({ label, showGMNotes = false, compact = false, onSaveGMNote }: Props) {
+  const isPartial = isPartiallyDestroyed(label);
+
   return (
     <div className={compact ? "space-y-3" : "space-y-6"}>
       {label.destroyed ? (
         <section className="rounded-md border border-flower/20 bg-flower/10 px-3 py-2 text-sm font-bold text-flower">
           Destroyed
+        </section>
+      ) : null}
+      {isPartial ? (
+        <section className="rounded-md border border-sun/40 bg-sun/20 px-3 py-2 text-sm font-bold text-copper">
+          Partially Destroyed
         </section>
       ) : null}
 

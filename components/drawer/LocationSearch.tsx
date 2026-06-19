@@ -15,7 +15,7 @@ export function LocationSearch({ value, onChange }: Props) {
       <Input
         aria-label="Search locations"
         className="bg-white/80 pl-9"
-        placeholder="Search locations..."
+        placeholder="Search, tag:VIP,tavern, event:dragon"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />

@@ -4,6 +4,11 @@ import { verifyGMById } from "@/lib/supabase-gm";
 
 export const GM_COOKIE = "gm_session";
 export const GM_SESSION_MAX_AGE_SECONDS = 60 * 60;
+export const EXTENDED_GM_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+
+export function getGMSessionMaxAgeSeconds(username?: string | null) {
+  return username === "cool-pants" ? EXTENDED_GM_SESSION_MAX_AGE_SECONDS : GM_SESSION_MAX_AGE_SECONDS;
+}
 
 export async function getGMSession() {
   const cookieStore = await cookies();
