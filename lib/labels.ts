@@ -30,6 +30,7 @@ export type MapLabel = {
   y: number;
   type: LabelType;
   visibility: LabelVisibility;
+  destroyed: boolean;
   icon?: string;
   region?: string;
   tags: string[];
@@ -59,6 +60,7 @@ export const sampleLabels: MapLabel[] = [
     y: 640,
     type: "town",
     visibility: "public",
+    destroyed: false,
     icon: "D",
     region: "Delimbiyr Vale",
     tags: ["trade", "rebuilding", "roads"],
@@ -93,6 +95,7 @@ export const sampleLabels: MapLabel[] = [
     y: 502,
     type: "city",
     visibility: "public",
+    destroyed: false,
     icon: "W",
     region: "Sword Coast North",
     tags: ["city", "politics", "guilds"],
@@ -110,6 +113,7 @@ export const sampleLabels: MapLabel[] = [
     y: 332,
     type: "city",
     visibility: "public",
+    destroyed: false,
     icon: "N",
     region: "Sword Coast North",
     tags: ["city", "reconstruction", "north"],
@@ -127,6 +131,7 @@ export const sampleLabels: MapLabel[] = [
     y: 815,
     type: "city",
     visibility: "public",
+    destroyed: false,
     icon: "B",
     region: "Western Heartlands",
     tags: ["harbor", "mercantile", "danger"],
@@ -144,6 +149,7 @@ export const sampleLabels: MapLabel[] = [
     y: 665,
     type: "danger",
     visibility: "public",
+    destroyed: false,
     icon: "L",
     region: "Delimbiyr Vale",
     tags: ["marsh", "undead", "hazard"],

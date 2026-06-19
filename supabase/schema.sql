@@ -20,6 +20,7 @@ create table if not exists labels (
   y numeric not null,
   type text not null default 'location',
   visibility text not null default 'public',
+  destroyed boolean not null default false,
   icon text,
   region text,
   tags text[] not null default '{}',
@@ -45,6 +46,7 @@ create table if not exists gm_notes (
 );
 
 alter table gm_notes add column if not exists tags text[] not null default '{}';
+alter table labels add column if not exists destroyed boolean not null default false;
 
 create index if not exists labels_visibility_idx on labels (visibility);
 create index if not exists labels_type_idx on labels (type);

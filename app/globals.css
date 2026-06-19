@@ -60,6 +60,7 @@ select {
   font-weight: 800;
   height: 28px;
   justify-content: center;
+  position: relative;
   width: 28px;
   backdrop-filter: blur(10px);
 }
@@ -67,6 +68,35 @@ select {
 .atlas-marker-hidden {
   opacity: 0.45;
   filter: saturate(0.35);
+}
+
+.atlas-marker-destroyed {
+  border-color: #d94b35;
+  color: #d94b35;
+}
+
+.atlas-marker-destroyed::before,
+.atlas-marker-destroyed::after {
+  background: #d94b35;
+  border-radius: 999px;
+  content: "";
+  height: 2px;
+  left: 4px;
+  position: absolute;
+  right: 4px;
+  top: 13px;
+}
+
+.atlas-marker-destroyed::before {
+  transform: rotate(45deg);
+}
+
+.atlas-marker-destroyed::after {
+  transform: rotate(-45deg);
+}
+
+.atlas-marker-destroyed span {
+  opacity: 0.38;
 }
 
 .atlas-popup .leaflet-popup-content-wrapper {

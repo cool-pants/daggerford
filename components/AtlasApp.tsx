@@ -150,14 +150,15 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setRulerMode(false);
-        setRulerPoints([]);
+        if (!editorOpen && !sheetLabelId) {
+          setRulerPoints([]);
+        }
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [editorOpen, sheetLabelId]);
 
   return (
     <main className="flex h-dvh min-h-[680px] flex-col overflow-hidden">
@@ -242,7 +243,7 @@ export function AtlasApp({ initialGM, initialIsGM, initialLabels }: AtlasAppProp
           ) : null}
           {rulerMode ? (
             <div className="absolute left-1/2 top-4 z-[700] -translate-x-1/2 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-parchment shadow-atlas">
-              Click map points to measure. Press Esc to exit.
+              Click map points to measure. Press Esc to clear.
             </div>
           ) : null}
           <SwordCoastMap

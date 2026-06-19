@@ -9,6 +9,7 @@ type LabelRow = {
   y: string | number;
   type: MapLabel["type"];
   visibility: MapLabel["visibility"];
+  destroyed?: boolean | null;
   icon?: string | null;
   region?: string | null;
   tags?: string[] | null;
@@ -69,6 +70,7 @@ function mapLabel(row: LabelRow): MapLabel {
     y: Number(row.y),
     type: row.type,
     visibility: row.visibility,
+    destroyed: Boolean(row.destroyed),
     icon: row.icon ?? undefined,
     region: row.region ?? undefined,
     tags: row.tags ?? [],
@@ -90,6 +92,7 @@ function toLabelRow(label: MapLabel, createdBy?: string) {
     y: label.y,
     type: label.type,
     visibility: label.visibility,
+    destroyed: label.destroyed,
     icon: label.icon,
     region: label.region,
     tags: label.tags,

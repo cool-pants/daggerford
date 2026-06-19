@@ -14,6 +14,7 @@ const emptyLabel: Omit<MapLabel, "id"> = {
   y: 0,
   type: "town",
   visibility: "public",
+  destroyed: false,
   icon: "",
   region: "",
   tags: [],
@@ -42,7 +43,8 @@ type Props = {
 
 export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelete }: Props) {
   const [draft, setDraft] = useState<Omit<MapLabel, "id">>(emptyLabel);
-  const [tags, setTags] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [linkedDungeons, setLinkedDungeons] = useState("");
   const [linkedNpcs, setLinkedNpcs] = useState("");
   const [linkedEvents, setLinkedEvents] = useState("");
@@ -57,6 +59,7 @@ export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelet
         y: label.y,
         type: label.type,
         visibility: label.visibility,
+        destroyed: label.destroyed,
         icon: label.icon,
         region: label.region,
         tags: label.tags,
@@ -66,7 +69,8 @@ export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelet
         linkedFactions: label.linkedFactions,
         notes: label.notes
       });
-      setTags(label.tags.join(", "));
+      setTags(label.tags);
+      setTagInput("");
       setLinkedDungeons(label.linkedDungeons.join(", "));
       setLinkedNpcs(label.linkedNpcs.join(", "));
       setLinkedEvents(label.linkedEvents.join(", "));
@@ -74,7 +78,8 @@ export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelet
       return;
     }
     setDraft({ ...emptyLabel, x: point?.x ?? 0, y: point?.y ?? 0 });
-    setTags("");
+    setTags([]);
+    setTagInput("");
     setLinkedDungeons("");
     setLinkedNpcs("");
     setLinkedEvents("");
@@ -89,7 +94,7 @@ export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelet
       title: draft.title.trim(),
       description: draft.description.trim(),
       icon: draft.icon?.trim() || draft.title.charAt(0).toUpperCase(),
-      tags: parseCsv(tags),
+      tags,
       linkedDungeons: parseCsv(linkedDungeons),
       linkedNpcs: parseCsv(linkedNpcs),
       linkedEvents: parseCsv(linkedEvents),
@@ -97,6 +102,19 @@ export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelet
     };
     onSave(saved);
     onClose();
+  }
+
+  function addTags(value: string) {
+    const nextTags = parseCsv(value);
+    if (!nextTags.length) {
+      return;
+    }
+    setTags((current) => Array.from(new Set([...current, ...nextTags])));
+    setTagInput("");
+  }
+
+  function removeTag(tag: string) {
+    setTags((current) => current.filter((item) => item !== tag));
   }
 
   return (
@@ -152,7 +170,15 @@ export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelet
             <Input value={draft.region} onChange={(event) => setDraft({ ...draft, region: event.target.value })} />
           </label>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <label className="flex items-center gap-2 rounded-md border border-ink/10 bg-white/70 px-3 py-2 text-sm font-semibold">
+          <input
+            checked={draft.destroyed}
+            type="checkbox"
+            onChange={(event) => setDraft({ ...draft, destroyed: event.target.checked })}
+          />
+          Mark as destroyed
+        </label>
+        <div className="grid gap-4 sm:grid-cols-2">
           <label className="block space-y-1 text-sm font-semibold">
             X
             <Input
@@ -169,10 +195,41 @@ export function LabelEditorDialog({ open, label, point, onClose, onSave, onDelet
               onChange={(event) => setDraft({ ...draft, y: Number(event.target.value) })}
             />
           </label>
+        </div>
+        <div className="space-y-2 rounded-md border border-white/70 bg-white/55 p-3">
           <label className="block space-y-1 text-sm font-semibold">
             Tags
-            <Input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="trade, roads" />
+            <div className="flex gap-2">
+              <Input
+                value={tagInput}
+                placeholder="trade, roads"
+                onChange={(event) => setTagInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    addTags(tagInput);
+                  }
+                }}
+              />
+              <Button type="button" variant="secondary" onClick={() => addTags(tagInput)}>
+                Add
+              </Button>
+            </div>
           </label>
+          {tags.length ? (
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <button
+                  key={tag}
+                  className="rounded-full bg-sky/15 px-3 py-1 text-xs font-bold text-tide transition hover:bg-sky/25"
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                >
+                  {tag} x
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block space-y-1 text-sm font-semibold">

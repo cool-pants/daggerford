@@ -30,9 +30,16 @@ export function LocationList({ labels, selectedId, onSelect }: Props) {
           >
             <div className="flex items-center justify-between gap-3">
               <h3 className="font-bold">{label.title}</h3>
-              <span className="rounded-full bg-meadow/15 px-2 py-0.5 text-xs font-semibold capitalize text-moss">
-                {label.type}
-              </span>
+              <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                {label.destroyed ? (
+                  <span className="rounded-full bg-flower/15 px-2 py-0.5 text-xs font-semibold text-flower">
+                    destroyed
+                  </span>
+                ) : null}
+                <span className="rounded-full bg-meadow/15 px-2 py-0.5 text-xs font-semibold capitalize text-moss">
+                  {label.type}
+                </span>
+              </div>
             </div>
             {label.visibility !== "public" ? (
               <span className="mt-2 inline-flex rounded-full bg-ink/10 px-2 py-0.5 text-xs font-bold capitalize text-ink/50">

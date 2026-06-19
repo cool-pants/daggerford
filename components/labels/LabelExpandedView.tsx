@@ -35,6 +35,12 @@ const relationGroups = [
 export function LabelExpandedView({ label, showGMNotes = false, compact = false, onSaveGMNote }: Props) {
   return (
     <div className={compact ? "space-y-3" : "space-y-6"}>
+      {label.destroyed ? (
+        <section className="rounded-md border border-flower/20 bg-flower/10 px-3 py-2 text-sm font-bold text-flower">
+          Destroyed
+        </section>
+      ) : null}
+
       <section>
         <h2 className={compact ? "sr-only" : "text-sm font-bold uppercase tracking-wide text-ink/50"}>
           Public Description

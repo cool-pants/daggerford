@@ -31,7 +31,7 @@ export function RulerPanel({ active, points, onClear, onClose }: Props) {
         <div>
           <h2 className="font-black">Delimbiyr Ruler</h2>
           <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-ink/50">
-            {active ? "Click map points. Esc exits." : "Measurement paused."}
+            {active ? "Click map points. Esc clears." : "Measurement paused."}
           </p>
         </div>
         <Button aria-label="Close ruler" size="icon" variant="ghost" onClick={onClose}>
